@@ -37,25 +37,6 @@ class AirportServiceTest {
     @Test
     void transformToDto_whenSourceIsValid_mapsAllFieldsCorrectly() {
         // Given: Create a complete, well-formed source object.
-        QantasApiAirport source = getQantasApiAirport();
-
-        // When: Call the transformation method.
-        AirportDto result = airportService.transformToDto(source);
-
-        // Then: Assert that every field in the result is correct.
-        assertThat(result).isNotNull();
-        assertThat(result.getAirportCode()).isEqualTo("SYD");
-        assertThat(result.getAirportName()).isEqualTo("Sydney Airport");
-        assertThat(result.getLatitude()).isEqualTo(-33.946);
-        assertThat(result.getLongitude()).isEqualTo(151.177);
-        assertThat(result.getCityName()).isEqualTo("Sydney");
-        assertThat(result.getStateCode()).isEqualTo("NSW");
-        assertThat(result.getStateName()).isEqualTo("New South Wales");
-        assertThat(result.getCountryCode()).isEqualTo("AU");
-        assertThat(result.getRegionName()).isEqualTo("Australia");
-    }
-
-    private static QantasApiAirport getQantasApiAirport() {
         QantasApiAirport source = new QantasApiAirport();
         source.setAirportCode("SYD");
         source.setAirportName("Sydney Airport");
@@ -84,7 +65,21 @@ class AirportServiceTest {
         region.setRegionCode("AU");
         region.setRegionName("Australia");
         source.setRegion(region);
-        return source;
+
+        // When: Call the transformation method.
+        AirportDto result = airportService.transformToDto(source);
+
+        // Then: Assert that every field in the result is correct.
+        assertThat(result).isNotNull();
+        assertThat(result.getAirportCode()).isEqualTo("SYD");
+        assertThat(result.getAirportName()).isEqualTo("Sydney Airport");
+        assertThat(result.getLatitude()).isEqualTo(-33.946);
+        assertThat(result.getLongitude()).isEqualTo(151.177);
+        assertThat(result.getCityName()).isEqualTo("Sydney");
+        assertThat(result.getStateCode()).isEqualTo("NSW");
+        assertThat(result.getStateName()).isEqualTo("New South Wales");
+        assertThat(result.getCountryCode()).isEqualTo("AU");
+        assertThat(result.getRegionName()).isEqualTo("Australia");
     }
 
     /**
@@ -95,20 +90,32 @@ class AirportServiceTest {
     @Test
     void transformToDto_whenStateIsEmptyObject_mapsStateFieldsToNull() {
         // Given: Create a source object with an empty but non-null state object.
-        QantasApiAirport source = new QantasApiAirport();
-        source.setAirportCode("AAA");
-        source.setAirportName("Anaa");
-        source.setLocation(new Location());
-        source.setCountry(new Country());
-        source.setRegion(new Region());
-        City city = new City();
-        city.setState(new State());
-        source.setCity(city);
+        QantasApiAirport source = createBaseAirport("AAA", "Anaa");
+        source.getCity().setState(new State()); // Empty state object
 
         // When: Call the transformation method.
         AirportDto result = airportService.transformToDto(source);
 
         // Then: Assert that the state fields are null.
+        assertThat(result).isNotNull();
+        assertThat(result.getStateCode()).isNull();
+        assertThat(result.getStateName()).isNull();
+    }
+
+    /**
+     * Tests that if the 'state' field is completely missing from the JSON (resulting in a null
+     * State object), the transformation still proceeds correctly with null state fields.
+     */
+    @Test
+    void transformToDto_whenStateObjectIsNull_mapsStateFieldsToNull() {
+        // Given: Create a source object where the state object itself is null.
+        QantasApiAirport source = createBaseAirport("BBB", "Baltra");
+        source.getCity().setState(null);
+
+        // When: Call the transformation method.
+        AirportDto result = airportService.transformToDto(source);
+
+        // Then: Assert that the state fields are correctly set to null.
         assertThat(result).isNotNull();
         assertThat(result.getStateCode()).isNull();
         assertThat(result.getStateName()).isNull();
@@ -131,5 +138,32 @@ class AirportServiceTest {
 
         // Then: Assert that the entire result is null.
         assertThat(result).isNull();
+    }
+
+    /**
+     * Tests the ultimate edge case where the entire source object passed to the method is null.
+     * The method should handle this gracefully by returning null.
+     */
+    @Test
+    void transformToDto_whenSourceIsNull_returnsNull() {
+        // When: Call the transformation method with a null input.
+        AirportDto result = airportService.transformToDto(null);
+
+        // Then: Assert that the result is null.
+        assertThat(result).isNull();
+    }
+
+    /**
+     * Helper method to create a base, valid airport object for testing.
+     */
+    private QantasApiAirport createBaseAirport(String code, String name) {
+        QantasApiAirport source = new QantasApiAirport();
+        source.setAirportCode(code);
+        source.setAirportName(name);
+        source.setLocation(new Location());
+        source.setCountry(new Country());
+        source.setRegion(new Region());
+        source.setCity(new City());
+        return source;
     }
 }
