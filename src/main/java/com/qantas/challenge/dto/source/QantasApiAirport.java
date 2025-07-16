@@ -14,6 +14,7 @@ public class QantasApiAirport {
     private String airportName;
     private Location location;
     private City city;
+    private State state;
     private Country country;
     private Region region;
 }

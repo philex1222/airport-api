@@ -50,11 +50,12 @@ class AirportServiceTest {
         city.setCityCode("SYD");
         city.setCityName("Sydney");
         city.setTimeZoneName("Australia/Sydney");
+        source.setCity(city);
+
         State state = new State();
         state.setStateCode("NSW");
         state.setStateName("New South Wales");
-        city.setState(state);
-        source.setCity(city);
+        source.setState(state);
 
         Country country = new Country();
         country.setCountryCode("AU");
@@ -91,7 +92,6 @@ class AirportServiceTest {
     void transformToDto_whenStateIsEmptyObject_mapsStateFieldsToNull() {
         // Given: Create a source object with an empty but non-null state object.
         QantasApiAirport source = createBaseAirport("AAA", "Anaa");
-        source.getCity().setState(new State()); // Empty state object
 
         // When: Call the transformation method.
         AirportDto result = airportService.transformToDto(source);
@@ -108,9 +108,9 @@ class AirportServiceTest {
      */
     @Test
     void transformToDto_whenStateObjectIsNull_mapsStateFieldsToNull() {
-        // Given: Create a source object where the state object itself is null.
+        // Given: Create a source object and explicitly set its state object to null.
         QantasApiAirport source = createBaseAirport("BBB", "Baltra");
-        source.getCity().setState(null);
+        source.setState(null);
 
         // When: Call the transformation method.
         AirportDto result = airportService.transformToDto(source);
@@ -164,6 +164,7 @@ class AirportServiceTest {
         source.setCountry(new Country());
         source.setRegion(new Region());
         source.setCity(new City());
+        source.setState(new State());
         return source;
     }
 }

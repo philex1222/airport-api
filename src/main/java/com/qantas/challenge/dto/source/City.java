@@ -12,5 +12,4 @@ public class City {
     private String cityCode;
     private String cityName;
     private String timeZoneName;
-    private State state;
 }
